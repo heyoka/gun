@@ -14,10 +14,6 @@
 
 -module(gun).
 
--ifdef(OTP_RELEASE).
--compile({nowarn_deprecated_function, [{erlang, get_stacktrace, 0}]}).
--endif.
-
 %% Connection.
 -export([open/2]).
 -export([open/3]).
@@ -650,8 +646,9 @@ proc_lib_hack(Parent, Owner, Host, Port, Opts) ->
 	catch
 		_:normal -> exit(normal);
 		_:shutdown -> exit(shutdown);
+		_:Reason:Stacktrace -> exit({Reason, Stacktrace});
 		_:Reason = {shutdown, _} -> exit(Reason);
-		_:Reason -> exit({Reason, erlang:get_stacktrace()})
+		_:Reason -> exit({Reason, notrace})
 	end.
 
 init(Parent, Owner, Host, Port, Opts) ->
